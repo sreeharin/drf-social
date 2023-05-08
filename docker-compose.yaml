@@ -1,0 +1,31 @@
+services:
+  app:
+    build:
+      context: .
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./app:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_HOST=db
+      - DB_NAME=drf_social_db
+      - DB_USER=drf_social_user
+      - DB_PASSWORD=drf_social_password
+    depends_on:
+      - db
+    restart: always
+
+  db:
+    image: postgres:15.2-alpine
+    volumes:
+      - vol-db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=drf_social_db
+      - POSTGRES_USER=drf_social_user
+      - POSTGRES_PASSWORD=drf_social_password
+
+volumes:
+  vol-db-data:
