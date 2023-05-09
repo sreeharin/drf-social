@@ -15,6 +15,9 @@ class Profile(models.Model):
         'self', symmetrical=False,
         blank=True, related_name='following')
 
+    def __str__(self):
+        return self.user.username
+
 
 class Post(models.Model):
     '''Model for post'''
@@ -28,7 +31,8 @@ class Post(models.Model):
 class Comment(models.Model):
     '''Model for comment'''
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
+    post = models.ForeignKey(
+        Post, on_delete=models.CASCADE, related_name='comments')
     comment = models.CharField(max_length=128)
 
 
