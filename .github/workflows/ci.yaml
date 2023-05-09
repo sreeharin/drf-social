@@ -35,9 +35,9 @@ jobs:
 
       - name: Run tests
         env:
-          DB_HOST=localhost
-          DB_NAME=drf_social_db
-          DB_USER=drf_social_user
-          DB_PASSWORD=drf_social_password
+          DB_HOST: localhost
+          DB_NAME: drf_social_db
+          DB_USER: drf_social_user
+          DB_PASSWORD: drf_social_password
         working-directory: ./app
         run: python manage.py test
