@@ -1,4 +1,5 @@
 import sys
+from django.shortcuts import get_object_or_404
 from rest_framework import (
     viewsets,
     status,
@@ -10,10 +11,12 @@ from rest_framework.response import Response
 from core.models import (
     Profile,
     Post,
+    Comment,
 )
 from api.serializers import (
     ProfileDetailSerializer,
     PostSerializer,
+    CommentSerializer,
 )
 
 
@@ -44,7 +47,6 @@ class ProfileViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
 
 
 class PostViewSet(
-        mixins.ListModelMixin,
         mixins.RetrieveModelMixin,
         mixins.CreateModelMixin,
         mixins.DestroyModelMixin,
@@ -63,3 +65,13 @@ class PostViewSet(
         if target_post.profile != profile:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         return super().destroy(request, pk=pk)
+
+class CommentViewSet(
+        mixins.ListModelMixin,
+        mixins.CreateModelMixin,
+        viewsets.GenericViewSet
+    ):
+    '''Comment viewset'''
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]

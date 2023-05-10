@@ -4,6 +4,7 @@ from rest_framework import serializers
 from core.models import (
     Profile,
     Post,
+    Comment,
 )
 
 
@@ -46,11 +47,29 @@ class PostSerializer(serializers.ModelSerializer):
         fields = ['id', 'profile', 'post', 'likes', 'dislikes']
 
     def create(self, validated_data):
-        post = Post.objects.create(
-            profile = self.context['request'].user.profile,
-            post = validated_data['post'],
+        return Post.objects.create(
+            profile=self.context['request'].user.profile,
+            post=validated_data['post'],
         )
-        return post
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    '''Comment serializer'''
+    profile = ProfileSerializer(read_only=True)
+    post = PostSerializer(read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = ['id', 'profile', 'post', 'comment']
+
+    def create(self, validated_data):
+        post_id = self.context['request'].data.get('post_id', None)
+        post = Post.objects.get(id=post_id)
+        return Comment.objects.create(
+            profile=self.context['request'].user.profile,
+            post=post,
+            comment=validated_data['comment']
+        )
 
 
 class ProfileDetailSerializer(serializers.ModelSerializer):
@@ -58,7 +77,7 @@ class ProfileDetailSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     follows = FollowSerializer(many=True, read_only=True)
     following = FollowSerializer(many=True, read_only=True)
-    posts = PostSerializer(many=True, read_only= True)
+    posts = PostSerializer(many=True, read_only=True)
 
     class Meta:
         model = Profile

@@ -166,8 +166,24 @@ class PostApiTests(TestCase):
         self.assertTrue(post_exists)
 
 
-#     def test_comment_post(self) -> None:
-#         '''Test for commenting on a post'''
+    def test_comment_post(self) -> None:
+        '''Test for commenting on a post'''
+        test_user = create_user(username='test_1')
+        post = create_post(profile=test_user.profile)
+        url = reverse('api:comment-list')
+        payload = {
+            'comment': 'Sample Comment',
+            'post_id': post.id,
+        }
+        res = self.client.post(url, payload)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        comment_exists = post.comments.filter(
+            comment=payload['comment']).exists()
+        self.assertTrue(comment_exists)
+        comment = post.comments.all()[0]
+        self.assertEqual(comment.comment, payload['comment'])
+        self.assertEqual(comment.post.id, payload['post_id'])
+        self.assertEqual(comment.profile, self.user.profile)
 
 #     def test_like_post(self) -> None:
 #         '''Test for liking a post'''

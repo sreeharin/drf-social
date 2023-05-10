@@ -4,12 +4,14 @@ from rest_framework.routers import DefaultRouter
 from api.views import (
     ProfileViewSet,
     PostViewSet,
+    CommentViewSet,
 )
 
 
 router = DefaultRouter()
 router.register('profile', ProfileViewSet, basename='profile')
 router.register('post', PostViewSet, basename='post')
+router.register('comment', CommentViewSet, basename='comment')
 
 app_name = 'api'
 urlpatterns = router.urls
