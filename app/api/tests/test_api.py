@@ -45,13 +45,17 @@ class ProfileApiTests(TestCase):
     def test_follow_profile(self) -> None:
         '''Test for following a profile'''
         dummy_user = create_user(username='dummy')
-        # dummy_user.profile.id also works
         url = reverse('api:profile-follow', args=[dummy_user.id])
         res = self.client.post(url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.user.refresh_from_db()
         self.assertIn(dummy_user.profile, self.user.profile.follows.all())
         self.assertIn(self.user.profile, dummy_user.profile.following.all())
+        user_serializer = ProfileSerializer(self.user.profile)
+        dummy_serializer = ProfileSerializer(dummy_user.profile)
+        self.assertEqual(
+            user_serializer.data['follows'][0]['user'],
+            dummy_serializer.data['user'])
 
     def test_follow_invalid_profile(self) -> None:
         '''Testing trying to follow invalid profile raises a 404 error'''
@@ -97,7 +101,10 @@ class ProfileApiTests(TestCase):
             serializer.data['user']['first_name'], dummy_user.first_name)
         self.assertEqual(
             serializer.data['user']['last_name'], dummy_user.last_name)
-        # self.assertIn(self.client.profile, serializer.data['following'])
+        user_serializer = ProfileSerializer(self.user.profile)
+        self.assertEqual(
+            user_serializer.data['user'],
+            serializer.data['following'][0]['user'])
 
 
 # class PostApiTests(TestCase):

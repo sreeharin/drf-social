@@ -13,6 +13,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 class FollowSerializer(serializers.ModelSerializer):
     '''Follower serializer'''
+    user = UserSerializer()
+
     class Meta:
         model = Profile
         fields = ['user']
@@ -22,6 +24,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     '''Profile model serializer'''
     user = UserSerializer()
     follows = FollowSerializer(many=True)
+    following = FollowSerializer(many=True)
 
     class Meta:
         model = Profile
