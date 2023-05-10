@@ -1,14 +1,30 @@
 import sys
-from rest_framework import viewsets, status
+from rest_framework import (
+    viewsets,
+    status,
+    mixins,
+)
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from core.models import Profile
-from api.serializers import ProfileSerializer
+from core.models import (
+    Profile,
+    Post,
+)
+from api.serializers import (
+    ProfileDetailSerializer,
+    PostSerializer,
+)
 
 
-class ProfileViewSet(viewsets.ModelViewSet):
+class ProfileViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    '''
+    Profile viewset
+    Provides views for viewing a profile, following/unfollowing a profile
+    '''
     queryset = Profile.objects.all()
-    serializer_class = ProfileSerializer
+    serializer_class = ProfileDetailSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     @action(detail=True, methods=['POST'])
     def follow(self, request, pk=None):
@@ -16,7 +32,6 @@ class ProfileViewSet(viewsets.ModelViewSet):
         target_profile = self.get_object()
         user = request.user
         user.profile.follows.add(target_profile)
-        user.profile.save()
         return Response(status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['POST'])
@@ -25,6 +40,26 @@ class ProfileViewSet(viewsets.ModelViewSet):
         target_profile = self.get_object()
         user = request.user
         user.profile.follows.remove(target_profile)
-        user.profile.save()
         return Response(status=status.HTTP_200_OK)
 
+
+class PostViewSet(
+        mixins.ListModelMixin,
+        mixins.RetrieveModelMixin,
+        mixins.CreateModelMixin,
+        mixins.DestroyModelMixin,
+        viewsets.GenericViewSet
+    ):
+    '''Post viewset'''
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def destroy(self, request, pk=None):
+        '''Only authorized person can delete a post'''
+        target_post = self.get_object()
+        profile = request.user.profile
+
+        if target_post.profile != profile:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        return super().destroy(request, pk=pk)
