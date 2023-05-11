@@ -219,8 +219,8 @@ class PostApiTests(TestCase):
 
     def test_all_posts_of_profile(self) -> None:
         '''Test for viewing all posts of a profile'''
-        post_1 = create_post(profile=self.user.profile)
-        post_2 = create_post(profile=self.user.profile)
+        create_post(profile=self.user.profile)
+        create_post(profile=self.user.profile)
         url = reverse('api:post-list')
         res = self.client.get(url, {'profile': self.user.profile.id})
         self.assertEqual(res.status_code, status.HTTP_200_OK)
