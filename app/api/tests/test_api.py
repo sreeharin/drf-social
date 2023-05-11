@@ -10,7 +10,6 @@ Tests for API include
     d. View post by id
     e. Return all posts of a user
 '''
-import sys
 from typing import Type
 from django.test import TestCase
 from django.urls import reverse
@@ -169,7 +168,7 @@ class PostApiTests(TestCase):
         '''Test for commenting on a post'''
         test_user = create_user(username='test_1')
         post = create_post(profile=test_user.profile)
-        url = reverse('api:comment-list') # change to post-comment, args=[post.id]
+        url = reverse('api:comment-list')
         payload = {
             'comment': 'Sample Comment',
             'post_id': post.id,
@@ -219,7 +218,7 @@ class PostApiTests(TestCase):
         self.assertEqual(res.data['id'], post.id)
 
     def test_all_posts_of_profile(self) -> None:
-        '''Test for viewing all posts by a profile'''
+        '''Test for viewing all posts of a profile'''
         post_1 = create_post(profile=self.user.profile)
         post_2 = create_post(profile=self.user.profile)
         url = reverse('api:post-list')
@@ -227,16 +226,3 @@ class PostApiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         posts_serializer = PostSerializer(res.data, many=True)
         self.assertEqual(len(posts_serializer.data), 2)
-
-
-# class PublicApiTests(TestCase):
-#     '''Test cases for anonymous user'''
-
-#     def test_view_profile(self) -> None:
-#         '''Test viewing profile by anonymous user'''
-
-#     def test_follow_profile(self) -> None:
-#         '''Test for following profile by anonymous user'''
-
-#     def test_unfollow_profile(self) -> None:
-#         '''Test for unfollowing profile by anonymous user'''
