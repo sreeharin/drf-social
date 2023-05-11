@@ -1,4 +1,4 @@
-# Drf-Social
+# Drf-Social ![CI](https://github.com/sreeharin/drf-social/actions/workflows/ci.yaml/badge.svg)
 This is a simple social media backend project built using Django Rest Framework. The project features include following/unfollowing a profile, creating a post, deleting a created post, liking/disliking a post, commenting on a post, and viewing profile and post details.
 
 ## Getting Started
