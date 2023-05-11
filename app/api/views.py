@@ -47,15 +47,23 @@ class ProfileViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
 
 
 class PostViewSet(
+        mixins.ListModelMixin,
         mixins.RetrieveModelMixin,
         mixins.CreateModelMixin,
         mixins.DestroyModelMixin,
         viewsets.GenericViewSet
     ):
     '''Post viewset'''
-    queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        '''Filter queryset by profile id'''
+        queryset = Post.objects.all()
+        profile = self.request.query_params.get('profile')
+        if profile is not None:
+            queryset = queryset.filter(profile=profile)
+        return queryset
 
     def destroy(self, request, pk=None):
         '''Only authorized person can delete a post'''
@@ -65,6 +73,21 @@ class PostViewSet(
         if target_post.profile != profile:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         return super().destroy(request, pk=pk)
+
+    @action(detail=True, methods=['POST'])
+    def like(self, request, pk=None):
+        '''Custom action for liking a post'''
+        target_post = self.get_object()
+        target_post.likes.add(request.user.profile)
+        return Response(status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['POST'])
+    def dislike(self, request, pk=None):
+        '''Custom action for disliking a post'''
+        target_post = self.get_object()
+        target_post.dislikes.add(request.user.profile)
+        return Response(status=status.HTTP_200_OK)
+
 
 class CommentViewSet(
         mixins.ListModelMixin,

@@ -72,7 +72,7 @@ class ProfileApiTests(TestCase):
 
     def test_follow_invalid_profile(self) -> None:
         '''Testing trying to follow invalid profile raises a 404 error'''
-        url = reverse('api:profile-follow', args=[9])
+        url = reverse('api:profile-follow', args=[666])
         res = self.client.post(url)
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -165,12 +165,11 @@ class PostApiTests(TestCase):
         post_exists = Post.objects.filter(id=post.id).exists()
         self.assertTrue(post_exists)
 
-
     def test_comment_post(self) -> None:
         '''Test for commenting on a post'''
         test_user = create_user(username='test_1')
         post = create_post(profile=test_user.profile)
-        url = reverse('api:comment-list')
+        url = reverse('api:comment-list') # change to post-comment, args=[post.id]
         payload = {
             'comment': 'Sample Comment',
             'post_id': post.id,
@@ -185,17 +184,49 @@ class PostApiTests(TestCase):
         self.assertEqual(comment.post.id, payload['post_id'])
         self.assertEqual(comment.profile, self.user.profile)
 
-#     def test_like_post(self) -> None:
-#         '''Test for liking a post'''
+    def test_like_post(self) -> None:
+        '''Test for liking a post'''
+        user = create_user(username='test_1')
+        post = create_post(profile=user.profile)
+        url = reverse('api:post-like', args=[post.id])
+        res = self.client.post(url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        like_count = post.likes.count()
+        self.assertEqual(like_count, 1)
+        self.assertIn(self.user.profile, post.likes.all())
 
-#     def test_dislike_post(self) -> None:
-#         '''Test for disliking a post'''
+    def test_dislike_post(self) -> None:
+        '''Test for disliking a post'''
+        user = create_user(username='test_1')
+        post = create_post(profile=user.profile)
+        url = reverse('api:post-dislike', args=[post.id])
+        res = self.client.post(url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        dislike_count = post.dislikes.count()
+        self.assertEqual(dislike_count, 1)
+        self.assertIn(self.user.profile, post.dislikes.all())
 
-#     def test_get_post_by_id(self) -> None:
-#         '''Test for view post details by id of post'''
+    def test_get_post_by_id(self) -> None:
+        '''Test for view post details by id of post'''
+        post = create_post(profile=self.user.profile)
+        url = reverse('api:post-detail', args=[post.id])
+        res = self.client.get(url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        post_serializer = PostSerializer(res.data)
+        self.assertEqual(res.data, post_serializer.data)
+        self.assertEqual(
+            res.data['profile']['user']['username'], self.user.username)
+        self.assertEqual(res.data['id'], post.id)
 
-#     def test_all_posts_of_profile(self) -> None:
-#         '''Test for viewing all posts by a profile'''
+    def test_all_posts_of_profile(self) -> None:
+        '''Test for viewing all posts by a profile'''
+        post_1 = create_post(profile=self.user.profile)
+        post_2 = create_post(profile=self.user.profile)
+        url = reverse('api:post-list')
+        res = self.client.get(url, {'profile': self.user.profile.id})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        posts_serializer = PostSerializer(res.data, many=True)
+        self.assertEqual(len(posts_serializer.data), 2)
 
 
 # class PublicApiTests(TestCase):
