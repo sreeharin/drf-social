@@ -8,7 +8,7 @@ This is a simple social media backend project built using Django Rest Framework.
 - Clone the repo
 
 ```
-$ git clone git@github.com:sreehari/drf-social.git
+$ git clone git@github.com:sreeharin/drf-social.git
 $ cd drf-social
 ```
 
